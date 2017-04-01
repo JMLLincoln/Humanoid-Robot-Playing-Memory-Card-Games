@@ -1,6 +1,8 @@
 import cv2
 import numpy as np
 
+from skimage.measure import compare_ssim as ssim
+
 class camera:
 
     def __init__(self, run):
@@ -16,7 +18,9 @@ class camera:
         
         self.box_points = []
         self.card_bin = []
-        
+
+        self.done = False
+
         if run:
             self.loop()        
 
@@ -29,6 +33,17 @@ class camera:
             self.detect_objects()
             self.proc_cards()
             self.out(image = True, binary = True)
+
+            if self.card_bin and not self.done:
+                print("\nCOMPARE")
+                for i in range(1, len(self.card_bin)):
+                    for j in range(i+1, len(self.card_bin)+1):
+                        print("%s by %s:" % (i, j))
+                        t = self.compare_images(self.card_bin[i-1], self.card_bin[j-1])
+                        if t:
+                            print("\n\nSuccessful match with: %s and %s" % (i, j))
+
+                self.done = True
 
             self.c_id = 65
             
@@ -61,7 +76,7 @@ class camera:
         if binary:
             cv2.imshow('binary', self.binary)
 
-        i = -1
+        i = 0
         for b in self.card_bin:
             i += 1
             try:
@@ -133,7 +148,7 @@ class camera:
 
             # Playing Cards: 30000
             # Handmade Cards: 18000
-            if area > 18000:
+            if area > 14000:
                 key = self.get_id()
                 value = [cons[i]]
                 #for k in kids:
@@ -162,7 +177,8 @@ class camera:
             i += 1
             
             self.card_bin.append(self.rotate_card(box))
-            self.card_bin[i] = self.card_bin[i][10:149, 10:128]
+            self.card_bin[i] = self.card_bin[i][25:134, 25:113]
+            self.card_bin[i] = 255 - self.card_bin[i]
             
     def rotate_card(self, box):
         
@@ -175,6 +191,36 @@ class camera:
         h, status = cv2.findHomography(box, pts_dst)
 
         return cv2.warpPerspective(self.binary, h, (im_dst.shape[1], im_dst.shape[0]))
+
+    def compare_images(self, A, B):
+        
+        err = np.sum((A.astype("float") - B.astype("float")) ** 2)
+        err /= float(A.shape[0] * A.shape[1])
+
+        print("M: %s" % err)
+
+        ssim_none = ssim(A, B, data_range = A.max() - A.min())
+
+        print("S: %s" % ssim_none)
+
+        im, c1, hierarchy = cv2.findContours(A, 1, 2)
+        p1 = cv2.arcLength(c1[0], True)
+        
+        im, c2, hierarchy = cv2.findContours(B, 1, 2)
+        p2 = cv2.arcLength(c2[0], True)
+
+        if p1 > p2:
+            p = p1 - p2
+        else:
+            p = p2 - p1
+            
+        print("P: %s" % p)
+
+        if err > 5000 or ssim_none < 0.75 or p > 20:
+            return False
+        else:
+            return True
+            
 
 c = camera(run = True)
 
