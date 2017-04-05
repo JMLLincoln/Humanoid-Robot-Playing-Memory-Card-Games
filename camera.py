@@ -90,17 +90,21 @@ class Feed:
     def rotate_image(self, image, center, theta, height, width):
         ''' Change the rotation of an image so that one side is
             parallel with the screen width (turn upright) '''
-        degrees = theta * (180 / math.pi)
         center = (height / 2, width / 2)
-        M = cv2.getRotationMatrix2D(center, degrees, 1)
+        M = cv2.getRotationMatrix2D(center, theta, 1)
         output = cv2.warpAffine(image, M, (height, width))
         return output
         
     def compare(self, A, B):
         ''' Take two images and test for similarities '''
         pass
-
-    def out(self, **kwargs):
+    
+    def out_one(self, name, image):
+        ''' Takes in a single window name and an image then
+            displays the image to the screen. '''
+        cv2.imshow(name, image)
+                
+    def out_multi(self, **kwargs):
         ''' Takes in window names and images and displays them to the
             screen. Use the following format:
             'Feed.out(name = image)'
@@ -141,7 +145,13 @@ class Geometry:
         b = self.pythag(opp_point, adj_point)
         c = self.pythag(adj_point, center_point)
 
+        #self.draw_traingle(image, (center_point, adj_point, opp_point))
+
         angle = self.SSS(a, b, c)
+        angle *= (180 / math.pi)
+        if center_point[1] < opp_point[1]:
+            angle = 360 - angle
+        
         return center_point, angle
         
     def find_center(self, A, B):
@@ -160,6 +170,19 @@ class Geometry:
         ''' Simple equation to find the angle using three sides '''
         D = ((c  **  2) + (a  **  2) - (b  **  2)) / (2 * c * a)
         return math.acos(D)
+
+    def draw_traingle(self, image, points):
+        ''' Draws a triangle from the three points given as well
+            as the points themselves for clarity '''
+        lines = [[points[0], points[1]],
+                 [points[1], points[2]],
+                 [points[2], points[0]]]
+        
+        for line in lines:
+            cv2.line(image, line[0], line[1], (255, 255, 0), 2)
+
+        for point in points:
+            cv2.circle(image, point, 2, (0, 0, 255), 2)
 
 
 
@@ -194,3 +217,8 @@ class Geometry:
 ##            calculations are done to find the length of the
 ##            newly created triangle. These are used to work out
 ##            the angle of rotation in relation to the screen
+##
+##            This angle is in radians so it's converted using
+##            T * (180 / pi). There is a final comparison which checks
+##            if the angle is supposed to be acute or obtuse in which 
+##            case it adjusts the angle accordingly

@@ -9,7 +9,7 @@ while(True):
     # Convert the BGR image to grayscale
     gray = cam.to_gray(colour)
     # Convert the grayscale image to binary
-    binary = cam.to_binary(gray, 100, 255)
+    binary = cam.to_binary(gray, 190, 255) #100:255
 
     # Morphologically process the binary image
     #binary = cam.close((5, 5), binary)
@@ -17,7 +17,7 @@ while(True):
     # Get the contours from the binary image
     contours, hierarchy = cam.get_contours(binary)
     # Remove the contours which have an area outside the limits
-    contours = cam.remove_contours(contours, 10000, 25000)
+    contours = cam.remove_contours(contours, 20000, 30000) # 10k:25k
     
     # Create box points for each contour, outlining the cards
     boxes = []
@@ -43,14 +43,14 @@ while(True):
             print("The game board is most likely corrupt.\n")
 
     # Output the colour, grayscale, and binary images
-    cam.out(Colour = colour, Grayscale = gray, Binary = binary)
+    cam.out_multi(Colour = colour, Grayscale = gray, Binary = binary)
 
-    try:
-        # Try to output separated cards, could fail due obstacles
-        cam.out(Card0 = cards[0], Card1 = cards[1], Card2 = cards[2],
-                Card3 = cards[3], Card4 = cards[4])
-    except:
-        pass
+    # Output each detected and rotated card
+    i = 0
+    for card in cards:
+        i += 1
+        cam.out_one(str(i), card)
+        
 
     # Safely complete a single loop
     if cam.end_cycle():
