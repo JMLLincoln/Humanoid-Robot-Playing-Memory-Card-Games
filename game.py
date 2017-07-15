@@ -140,6 +140,8 @@ class Game:
 
 
 
+    def pl_input_shell(self):
+        ''' Take the input of the player from the Python shell '''
         inp = int(self.wait_for_user())
 
         inp -= 1
@@ -165,6 +167,7 @@ class Game:
             print("\nSelect a card, %s!" % self.turn)
 
             if (self.turn == self.pl_name):
+                self.pl_input_shell()
                 
             elif (self.turn == self.ai_name):
                 self.ai_input_random()
