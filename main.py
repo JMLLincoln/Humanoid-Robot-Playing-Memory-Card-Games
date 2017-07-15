@@ -8,6 +8,9 @@ draw = camera.Draw()
 errors = 0
 cards = {}
 positions = {}
+data_out = []
+numberOfCards = 0
+
 first_run = True
 
 while(True):
@@ -16,7 +19,7 @@ while(True):
     # Convert the BGR image to grayscale
     gray = cam.to_gray(colour = colour)
     # Convert the grayscale image to binary
-    binary = cam.to_binary(gray = gray, lower = 185, upper = 255) #100:255
+    binary = cam.to_binary(gray = gray, thresh = 140, max = 255) #185
 
     # Morphologically process the binary image
     #binary = cam.close((5, 5), binary)
@@ -25,7 +28,7 @@ while(True):
     contours, hierarchy = cam.get_contours(binary = binary)
     # Remove the contours which have an area outside the limits
     contours = cam.remove_contours(contours = contours,
-                                   lower = 20000, upper = 30000) # 10k:25k
+                                   lower = 5000, upper = 35000) # 10k:25k
     
     # Create box points for each contour, outlining the cards
     boxes = []
@@ -34,8 +37,8 @@ while(True):
 
     if not len(boxes) % 2 == 0 and first_run:
         print("Uneven number of playing cards detected. Has the board been set up?")
-        cam.quit()
-        break
+        #cam.quit()
+        #break
    
     # Draw the box points to the colour image
     draw.contours(contours = boxes, image = colour)
@@ -44,7 +47,7 @@ while(True):
     # Create separate card images for further processing 
     for box in boxes:
         # Find the rotation of the box in relation to the screen
-        center, angle = geo.find_orientation(box = box)
+        center, angle = geo.find_orientation(rect = box)
 
         # Assign each card to a certain index dependant on the
         # position of the center
@@ -84,6 +87,8 @@ while(True):
             print("%s): The game board is most likely corrupt.\n" % errors)
 
         if i == len(boxes):
+            print("Camera okay. Number of cards in play is %s" % i)
+            numberOfCards = i
             first_run = False
 
     # Output the colour, grayscale, and binary images
@@ -94,22 +99,34 @@ while(True):
         # The following few commands draw a small circle on
         # cards that are flipped over
         gr = cam.to_gray(colour = card)
-        bi = cam.to_binary(gray = gr, lower = 190, upper = 255)
+        bi = cam.to_binary(gray = gr, thresh = 130, max = 255)
 
         # Checks if the card is flipped and draws a small
         # circle in the corner of the window to indicate it
         w_pixels, b_pixels = cam.count_values(binary = bi)
         if w_pixels < b_pixels:
             draw.circle(image = card, center = (20, 20))
+            flipped = True
+        else:
+            flipped = False
 
         # Draw the center position as text for reference
-        draw.text(image = card, text = str(positions[index]),
-                  position = (10, 60))
+        string = "%s: %s" % (str(index), str(positions[index]))
+        draw.text(image = card, text = string, position = (10, 60))
 
         # Remove inner boxes if any (find a better way please)
         if w_pixels > 0: 
             cam.out_one(name = str(index), image = card)
-     
+
+        data_out = []
+        data = {
+            'position' : positions[index],
+            'flipped' : flipped
+        }
+        data_out.append(data)
+
+    
+    
     # Safely complete a single loop and end it if necessary
-    if cam.end_cycle():
+    if cam.end_cycle(delay = 500):
         break

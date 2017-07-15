@@ -34,10 +34,10 @@ class Feed:
         gr = cv2.cvtColor(colour, cv2.COLOR_BGR2GRAY)
         return gr
 
-    def to_binary(self, gray, lower, upper):
+    def to_binary(self, gray, thresh, max):
         ''' Take a grayscale image and return a binary image based
-            on upper and lower bounds '''
-        ret, bi = cv2.threshold(gray, lower, upper, cv2.THRESH_BINARY)
+            on the threshold '''
+        ret, bi = cv2.threshold(gray, thresh, max, cv2.THRESH_BINARY)
         return bi
     
     def open(self, size, binary):
@@ -132,28 +132,29 @@ class Feed:
 
 class Geometry:
 
-    def find_orientation(self, box):
+    def find_orientation(self, rect):
         ''' Finds the global rotation of the object in relation
             to the side of the camera. 
             '''      
-        center_point = self.find_center(A = box[0][0],
-                                        B = box[0][2])
+        center_point = self.find_center(A = rect[0][0],
+                                        B = rect[0][2])
         adj_point = (0, center_point[1])
         
-        a = self.pythag(A = box[0][0], B = box[0][1])
-        b = self.pythag(A = box[0][1], B = box[0][2])
+        a = self.pythag(A = rect[0][0], B = rect[0][1])
+        b = self.pythag(A = rect[0][1], B = rect[0][2])
         if a > b:
-            opp_point = self.find_center(A = box[0][1],
-                                         B = box[0][0])
+            opp_point = self.find_center(A = rect[0][1],
+                                         B = rect[0][0])
         else:
-            opp_point = self.find_center(A = box[0][1],
-                                         B = box[0][2])
+            opp_point = self.find_center(A = rect[0][1],
+                                         B = rect[0][2])
 
         side1 = self.pythag(A = center_point, B = opp_point)
-        side2 = self.pythag(A = opp_point,    B = adj_point)
-        side3 = self.pythag(A = adj_point,    B = center_point)
+        side2 = self.pythag(A = opp_point, B = adj_point)
+        side3 = self.pythag(A = adj_point, B = center_point)
 
-        #Draw.triangle(image, (center_point, adj_point, opp_point))
+        #d = Draw()
+        #d.triangle(image, [center_point, adj_point, opp_point])
 
         angle = self.SSS(a = side1, b = side2, c = side3)
         angle *= (180 / math.pi)
@@ -199,10 +200,10 @@ class Draw:
                  (points[0], points[2]), (points[1], points[2])]
         
         for line in lines:
-            self.draw_line(image, line[0])
+            self.line(image, line)
 
         for point in points:
-            self.draw_circle(image, point)
+            self.circle(image, point)
 
     def line(self, image, points):
         ''' Draws a line on image from the first point to the
