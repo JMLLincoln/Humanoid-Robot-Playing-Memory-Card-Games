@@ -1,9 +1,13 @@
 # Humanoid-Robot-Playing-Memory-Card-Games
-[Quick link to the page](https://jakemlyons.github.io)
 
 Again, this Readme file is a notepad for me; expect a small increase in time lost today.
 
 ---
+
+## Goal
+The goal of this project is to create the backend for a humanoid robot. It should be able to 'see' the game board, detect individual cards, select a card based on a neural network, and act accordingly (hand gestures, speach, facial expressions).
+Maybe not all of the humanoid features will be implemented but I'll give it a go.
+
 
 ## Present
 Currently, the modules are split apart quite a bit and should work alright one their own.
@@ -32,6 +36,3 @@ Currently, the modules are split apart quite a bit and should work alright one t
   
 ---
 
-## Future
-The goal of this project is to create the backend for a humanoid robot. It should be able to 'see' the game board, detect individual cards, select a card based on a neural network, and act accordingly (hand gestures, speach, facial expressions).
-Maybe not all of the humanoid features will be implemented but I'll give it a go.
