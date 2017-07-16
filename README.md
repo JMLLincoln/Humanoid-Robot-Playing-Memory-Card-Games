@@ -5,7 +5,7 @@ Again, this Readme file is a notepad for me; expect a small increase in time los
 ---
 
 ## Goal
-The goal of this project is to create the backend for a humanoid robot. It should be able to 'see' the game board, detect individual cards, select a card based on a neural network, and act accordingly (hand gestures, speach, facial expressions).
+The goal of this project is to create the backend for a humanoid robot. It should be able to 'see' the game board, detect individual cards, select a card based on a neural network, and act accordingly (hand gestures, speech, facial expressions).
 Maybe not all of the humanoid features will be implemented but I'll give it a go.
 
 
