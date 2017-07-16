@@ -1,3 +1,5 @@
+import asyncio
+import websockets
 import random as rnd
 
 class Game:
@@ -21,15 +23,16 @@ class Game:
         self.create_board()
 
         self.running = True
-        self.run() 
 
-    def get_state():
+        print("Game initiliased.")
+
+    def get_state(self):
         ''' Returns the information for the cards and the current turn '''
-        return self.board_out, self.board_data, self.turn
+        return self.board_out, self.board_data, self.turn, self.running
 
-    def get_score():
+    def get_scores(self):
         ''' Returns the current scores of both the player and the computer '''
-        return pl_score, ai_score
+        return self.pl_score, self.ai_score
 
     def create_board(self):
         ''' Randomly initialises the board '''
@@ -165,34 +168,60 @@ class Game:
 
         
 
-    def run(self):
-        
-        while (self.running):
+    async def step_game(self):
 
-            print()            
+        if self.running == True:
+            print()
             self.display_board()
             self.display_scores()
             print("\nSelect a card, %s!" % self.turn)
-
-            if (self.turn == self.pl_name):
-                self.pl_input_shell()
-                
-            elif (self.turn == self.ai_name):
-                self.ai_input_random()
 
             if (len(self.selection) == 2):
                 self.compare_selection()
                 self.check_for_finish()
                 self.reset_board_out()
 
-            if self.running == False:
+            elif self.running == False:
                 self.display_board()
                 self.display_scores()
                 self.display_ending()
-                break
-                    
+
+            elif (self.turn == self.pl_name):
+                self.pl_input_shell()
+                
+            elif (self.turn == self.ai_name):
+                self.ai_input_random()
+
 
 class UnevenCardTotal(Exception):
     pass
 
-g = Game(board_size = 8)
+
+
+async def game_handler(websocket):
+    
+    o, d, t, r = g.get_state()
+    p, a = g.get_scores()
+    
+    message = "%s|%s|%s|%s|%s|%s" % (o, d, t, p, a, r)
+    print("sending %s" % message)
+    await websocket.send(message)
+
+    await g.step_game()
+
+async def handler(websocket, path):
+    game_task = asyncio.ensure_future(game_handler(websocket))
+    
+    done, pending = await asyncio.wait([game_task],
+        return_when = asyncio.FIRST_COMPLETED,
+    )
+    
+    for task in pending:
+        task.cancel()
+
+start_server = websockets.serve(handler, '127.0.0.1', 8888)
+g = Game(board_size = 6)
+
+asyncio.get_event_loop().run_until_complete(start_server)
+asyncio.get_event_loop().run_forever()
+
