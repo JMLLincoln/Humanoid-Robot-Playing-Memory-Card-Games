@@ -8,6 +8,7 @@ Again, this Readme file is a notepad for me; expect a small increase in time los
 The goal of this project is to create the backend for a humanoid robot. It should be able to 'see' the game board, detect individual cards, select a card based on a neural network, and act accordingly (hand gestures, speech, facial expressions).
 Maybe not all of the humanoid features will be implemented but I'll give it a go.
 
+---
 
 ## Present
 Currently, the modules are split apart quite a bit and should work alright one their own.
@@ -34,5 +35,5 @@ Currently, the modules are split apart quite a bit and should work alright one t
 	+ then click 'play' on the website
 	+ should work, if it doesn't then hard lines
   
----
-
+5. main.py
+	+ makes camera.py work 
