@@ -100,7 +100,15 @@ class Feed:
     
     def compare(self, A, B):
         ''' Take two images and test for similarities '''
-        pass
+        try:
+            A = A[10:200,30:120]
+            B = B[10:200,30:120]
+        
+            err = np.sum((A.astype("float") - B.astype("float")) ** 2)
+            err /= float(A.shape[0] * B.shape[1])
+            return err
+        except:
+            return None
     
     def out_one(self, name, image):
         ''' Takes in a single window name and an image then
@@ -114,6 +122,18 @@ class Feed:
             Where name is the window name and image is a numpy array '''
         for key, value in kwargs.items():
             cv2.imshow(key, value)
+
+    def read_from_file(self, filename):
+        ''' Takes a path and read the image file at it's location
+            Note that this return the binary image of the file read '''
+        im = cv2.imread(filename)
+        gr = self.to_gray(im)
+        bi = self.to_binary(gr, 140, 255)
+        return bi
+
+    def save_to_file(self, filename, image):
+        ''' Takes an image and saves it to the specified path '''
+        cv2.imwrite(filename, image)
         
     def end_cycle(self, delay = 1):
         ''' Close all current windows and end the camera feed '''

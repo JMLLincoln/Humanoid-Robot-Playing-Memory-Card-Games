@@ -1,5 +1,6 @@
 import camera
 import numpy as np
+import json
 
 cam = camera.Feed()
 geo = camera.Geometry()
@@ -12,6 +13,12 @@ data_out = []
 numberOfCards = 0
 
 first_run = True
+
+templates = [
+    cam.read_from_file("./card-images/ace.png"),
+    cam.read_from_file("./card-images/two.png"),
+    cam.read_from_file("./card-images/three.png")
+    ]
 
 while(True):
     # Get the BGR frame of the video feed
@@ -91,40 +98,80 @@ while(True):
             numberOfCards = i
             first_run = False
 
+            for n in range(numberOfCards):
+                data_out.append({
+                    'index' : None,
+                    'position' : None,
+                    'flipped' : None,
+                    'value' : None
+                })
+                print("Card #%s defined in data_out" % n)
+
     # Output the colour, grayscale, and binary images
-    cam.out_multi(Colour = colour, Grayscale = gray, Binary = binary)
+    cam.out_multi(Colour = colour, Binary = binary)
 
     # Output each detected and rotated card
     for index, card in cards.items():
         # The following few commands draw a small circle on
         # cards that are flipped over
         gr = cam.to_gray(colour = card)
-        bi = cam.to_binary(gray = gr, thresh = 130, max = 255)
+        bi = cam.to_binary(gray = gr, thresh = 145, max = 255)
 
         # Checks if the card is flipped and draws a small
         # circle in the corner of the window to indicate it
         w_pixels, b_pixels = cam.count_values(binary = bi)
-        if w_pixels < b_pixels:
+        if w_pixels + b_pixels < 30000:
             draw.circle(image = card, center = (20, 20))
             flipped = True
         else:
             flipped = False
+            
+            if data_out[index - 1]['value'] == None:
+                vals = []
+                for temp in templates:
+                    err = cam.compare(bi, temp)
+                    vals.append(err)
+
+                if err == None:
+                    continue
+                
+                value = vals.index(min(vals)) + 1
+                print("Card is a %s" % value)
+                print(vals)
+                data_out[index - 1]['value'] = value
+                
 
         # Draw the center position as text for reference
         string = "%s: %s" % (str(index), str(positions[index]))
         draw.text(image = card, text = string, position = (10, 60))
 
-        # Remove inner boxes if any (find a better way please)
-        if w_pixels > 0: 
+        # Remove inner boxes if any (find a better way)
+        if w_pixels > 0:
+            #path = "./card-images/%s.png" % str(index)
+            #cam.save_to_file(filename = path, image = bi)
             cam.out_one(name = str(index), image = card)
 
-        data_out = []
-        data = {
-            'position' : positions[index],
-            'flipped' : flipped
-        }
-        data_out.append(data)
+        data_out[index - 1]['position'] = positions[index]
+        data_out[index - 1]['flipped'] = flipped
+        
+    for item in data_out:
+        if item['position'][1] < 200:
+            if item['position'][0] < 200:
+                item['index'] = 6
+            elif item['position'][0] < 370:
+                item['index'] = 5
+            else:
+                item['index'] = 4
+        else:
+            if item['position'][0] < 200:
+                item['index'] = 3
+            elif item['position'][0] < 370:
+                item['index'] = 2
+            else:
+                item['index'] = 1
 
+    with open('data.json', 'w') as out:
+        json.dump(data_out, out)
     
     
     # Safely complete a single loop and end it if necessary
