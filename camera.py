@@ -60,6 +60,11 @@ class Feed:
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, size)
         return cv2.dilate(binary, kernel, iterations = n)
 
+    def resize(self, image, size):
+        ''' Resizes the image to the size specified.
+            Size must be a tuple of 2 integers '''
+        return cv2.resize(image, size)
+
     def get_contours(self, binary):
         ''' Take a binary image and return the contours and hierarchy '''
         im, contours, hierarchy = cv2.findContours(binary, cv2.RETR_TREE,
@@ -131,9 +136,9 @@ class Feed:
         bi = self.to_binary(gr, 140, 255)
         return bi
 
-    def save_to_file(self, filename, image):
+    def save_to_file(self, path, image):
         ''' Takes an image and saves it to the specified path '''
-        cv2.imwrite(filename, image)
+        cv2.imwrite(path, image)
         
     def end_cycle(self, delay = 1):
         ''' Close all current windows and end the camera feed '''
@@ -235,11 +240,11 @@ class Draw:
             with a radius of 2 '''
         cv2.circle(image, center, 2, (0, 0, 255), 2)
 
-    def text(self, image, text, position):
+    def text(self, image, text, position, size = 0.5, colour = (255, 0, 0), thickness = 1):
         ''' Draws the specified text onto the image at the
             specified position '''
         font = cv2.FONT_HERSHEY_SIMPLEX
-        cv2.putText(image, text, position, font, 0.5, (255, 0, 0), 1)
+        cv2.putText(image, text, position, font, size, colour, thickness)
 
 
 ##      Find Orientation

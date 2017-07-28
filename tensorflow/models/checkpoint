@@ -1,0 +1,2 @@
+model_checkpoint_path: "F:\\Documents\\GitHub\\CS-2017-Project\\tensorflow\\models\\playingcards-0.001-5conv-basic.model"
+all_model_checkpoint_paths: "F:\\Documents\\GitHub\\CS-2017-Project\\tensorflow\\models\\playingcards-0.001-5conv-basic.model"
