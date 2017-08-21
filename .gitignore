@@ -2,12 +2,22 @@
 # Custom
 # =========================
 
-wheels/
 __pycache__
+
+wheels/
+
+tensorflow/log/
+tensorflow/models/
 tensorflow/test-images
 tensorflow/train-images
 tensorflow/cuda/
 tensorflow/wheels/
+
+non-playing-cards-test/30objects/
+non-playing-cards-test/log/
+non-playing-cards-test/models/
+non-playing-cards-test/test-images/
+non-playing-cards-test/training-set/
 
 
 
