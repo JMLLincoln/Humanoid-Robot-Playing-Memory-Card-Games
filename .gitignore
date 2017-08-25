@@ -19,6 +19,14 @@ non-playing-cards-test/models/
 non-playing-cards-test/test-images/
 non-playing-cards-test/training-set/
 
+cleaning/29objects/
+cleaning/card-images
+cleaning/concatenated-images
+cleaning/log/
+cleaning/models/
+cleaning/test-images/
+cleaning/training-set/
+cleaning/*.npy
 
 
 
